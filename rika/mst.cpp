@@ -1,11 +1,16 @@
 #include<bits/stdc++.h>
 using namespace std;
 #define INF 999999.0
-#define N 5
+#define N 4
 typedef pair<float,float> P;
 vector<P> data(N);		//x,y
-bool visited[N] = {};
+bool visited[N] = {};	
+vector<int> adj_MST[N];
+bool visited_mst[N] = {};
+vector<int> pre_trip;
 vector<int> trip;
+bool visited_sub[N] = {};
+float dis[N][N];
 
 struct UnionFind {
 	
@@ -76,26 +81,91 @@ struct Graph {
 	vector<Edge> E;
 
 	// calculate sum of len of "Minimum Spanning Tree"
-	float kruskal() {
+	void kruskal() {
 		sort(E.begin(), E.end());
 
 		UnionFind uf(N);
-		float min_len = 0.0;
+		// float min_len = 0.0;
 
 		for (int i = 0; i < (int)E.size(); i++) {
 			Edge& e = E[i];
 			if (!uf.in_same_tree(e.from, e.to)) {
 				// OK if circle cannot be made even when e is added.
-				min_len += e.len;
+				cout << e.from << "->" << e.to << "by" << e.len << endl;
+
+				// save in adj_MST for make_pre_trip
+				adj_MST[e.from].push_back(e.to);
+				adj_MST[e.to].push_back(e.from);
+				// min_len += e.len;
 				uf.unite_tree(e.from, e.to);
 			}
 		}
-	return min_len;
+	return;
 	}
 };
 
 Graph G;
 
+void make_pre_trip() {
+	// make trip by follow MST
+	int from = 0;
+	int to = adj_MST[0].back();
+	adj_MST[0].pop_back();
+
+	pre_trip.push_back(from);
+	visited_mst[from] = 1;
+	pre_trip.push_back(to);
+	visited_mst[to] = 1;
+
+	while (1) {
+		pre_trip.push_back(to);
+		visited_mst[to] = 1;
+		
+		// find next place
+		from = to;
+		
+		int size = adj_MST[from].size();
+
+		if (size == 0) {
+			// end
+			break;
+		}
+
+		if (size == 1) {
+			// go back is ok
+			to = adj_MST[from].back();
+			adj_MST[0].pop_back();
+		}
+		else {
+			for (int i = size- 1; i >= 0; i--) {
+				if (!visited_mst[adj_MST[from][i]]) {
+					to = adj_MST[from][i];
+					adj_MST[0].erase(adj_MST[0].begin() + i);
+					break;
+				}
+				else {
+					continue;
+				}
+			}
+		}
+	}
+
+	return;
+}
+
+void make_trip() {
+	// make trip from pre_trip
+	// not add duplication
+	
+	for (int i = 0; i < (int)pre_trip.size(); i++) {
+		if (!visited_sub[i]) {
+			trip.push_back(i);
+		}
+		visited_sub[i] = 1;
+	}
+}
+	
+	
 void make_distance(vector<P> data) {
 
 	for (int i = 0; i < N - 1; i++) {
@@ -106,6 +176,11 @@ void make_distance(vector<P> data) {
 			float y0 = data[i].second;
 			float y1 = data[j].second;
 			float len  = sqrt(pow(x1 - x0, 2.0) + pow(y1 - y0, 2.0));
+
+			// array
+			dis[i][j] = len;
+
+			// vector for order
 			Edge e;
 			e.from = i;
 			e.to = j;
@@ -131,7 +206,7 @@ int find_min(int k) {
 	return min_city;
 }
 */
-/*
+
 float cal_total_len(vector<int> trip) {
 
 	float len = 0.0;
@@ -142,7 +217,7 @@ float cal_total_len(vector<int> trip) {
 
 	return len;
 }
-*/
+
 void print_trip() {
 
 	for (auto num : trip) {
@@ -174,7 +249,10 @@ int main() {
 
 	make_distance(data);
 
-	cout << "cost of MST " << G.kruskal() << endl;
+	G.kruskal();
+	make_pre_trip();
+	make_trip();
+	print_trip();
 	
     return 0;
 }
