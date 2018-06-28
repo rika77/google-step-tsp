@@ -1,7 +1,7 @@
 #include<bits/stdc++.h>
 using namespace std;
 #define INF 999999.0
-#define N 4
+#define N 8
 typedef pair<float,float> P;
 vector<P> data(N);		//x,y
 bool visited[N] = {};	
@@ -91,7 +91,8 @@ struct Graph {
 			Edge& e = E[i];
 			if (!uf.in_same_tree(e.from, e.to)) {
 				// OK if circle cannot be made even when e is added.
-				cout << e.from << "->" << e.to << "by" << e.len << endl;
+				// cout << e.from << "->" << e.to << "by" << e.len << endl;
+				//
 
 				// save in adj_MST for make_pre_trip
 				adj_MST[e.from].push_back(e.to);
@@ -114,10 +115,9 @@ void make_pre_trip() {
 
 	pre_trip.push_back(from);
 	visited_mst[from] = 1;
-	pre_trip.push_back(to);
-	visited_mst[to] = 1;
 
 	while (1) {
+		//cout << from << "->" << to << endl;
 		pre_trip.push_back(to);
 		visited_mst[to] = 1;
 		
@@ -125,7 +125,7 @@ void make_pre_trip() {
 		from = to;
 		
 		int size = adj_MST[from].size();
-
+		//cout << size << endl;
 		if (size == 0) {
 			// end
 			break;
@@ -133,14 +133,14 @@ void make_pre_trip() {
 
 		if (size == 1) {
 			// go back is ok
-			to = adj_MST[from].back();
-			adj_MST[0].pop_back();
+			to = adj_MST[from][0];
+			adj_MST[from].pop_back();
 		}
 		else {
 			for (int i = size- 1; i >= 0; i--) {
 				if (!visited_mst[adj_MST[from][i]]) {
 					to = adj_MST[from][i];
-					adj_MST[0].erase(adj_MST[0].begin() + i);
+					adj_MST[from].erase(adj_MST[from].begin() + i);
 					break;
 				}
 				else {
@@ -153,23 +153,26 @@ void make_pre_trip() {
 	return;
 }
 
+
 void make_trip() {
+
 	// make trip from pre_trip
 	// not add duplication
-	
-	for (int i = 0; i < (int)pre_trip.size(); i++) {
-		if (!visited_sub[i]) {
-			trip.push_back(i);
+
+	for (auto num : pre_trip) {
+		if (!visited_sub[num]) {
+			trip.push_back(num);
 		}
-		visited_sub[i] = 1;
+		visited_sub[num] = 1;
 	}
+
 }
 	
 	
 void make_distance(vector<P> data) {
 
-	for (int i = 0; i < N - 1; i++) {
-		for (int j = i + 1; j < N; j++) {
+	for (int i = 0; i < N; i++) {
+		for (int j = 0; j < N; j++) {
 
 			float x0 = data[i].first;
 			float x1 = data[j].first;
@@ -179,13 +182,15 @@ void make_distance(vector<P> data) {
 
 			// array
 			dis[i][j] = len;
-
+			
+			if (i != N - 1 && i < j){ 
 			// vector for order
-			Edge e;
-			e.from = i;
-			e.to = j;
-			e.len = len;
-			G.E.push_back(e);
+				Edge e;
+				e.from = i;
+				e.to = j;
+				e.len = len;
+				G.E.push_back(e);
+			}
 		}
 	}
 }
@@ -218,20 +223,21 @@ float cal_total_len(vector<int> trip) {
 	return len;
 }
 
-void print_trip() {
+void print_trip(vector<int> trip) {
 
 	for (auto num : trip) {
 		cout << num << endl;
 	}
 }
-/*
-void print_total_len () {
 
+void print_total_len() {
+
+	cout << "index" << endl;
 	float min_len = cal_total_len(trip);
 	cout << setprecision(10) << min_len << endl;
 
 }
-*/
+
 
 int main() {
 
@@ -251,8 +257,11 @@ int main() {
 
 	G.kruskal();
 	make_pre_trip();
+	//print_trip(pre_trip);
+
 	make_trip();
-	print_trip();
-	
+	print_trip(trip);
+
+	// print_total_len();
     return 0;
 }
