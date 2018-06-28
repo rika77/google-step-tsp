@@ -1,7 +1,7 @@
 #include<bits/stdc++.h>
 using namespace std;
 #define INF 999999.0
-#define N 8
+#define N 128
 typedef pair<float,float> P;
 vector<P> data(N);		//x,y
 bool visited[N] = {};	
@@ -11,6 +11,10 @@ vector<int> pre_trip;
 vector<int> trip;
 bool visited_sub[N] = {};
 float dis[N][N];
+
+
+int min_from;
+int min_to;
 
 struct UnionFind {
 	
@@ -86,13 +90,17 @@ struct Graph {
 
 		UnionFind uf(N);
 		// float min_len = 0.0;
-
+		bool flag = false;
 		for (int i = 0; i < (int)E.size(); i++) {
 			Edge& e = E[i];
 			if (!uf.in_same_tree(e.from, e.to)) {
 				// OK if circle cannot be made even when e is added.
-				// cout << e.from << "->" << e.to << "by" << e.len << endl;
-				//
+				cout << e.from << "->" << e.to << "by" << e.len << endl;
+				if (!flag) {
+					min_from = e.from;
+					min_to = e.to;
+					flag = true;
+				}
 
 				// save in adj_MST for make_pre_trip
 				adj_MST[e.from].push_back(e.to);
@@ -109,9 +117,9 @@ Graph G;
 
 void make_pre_trip() {
 	// make trip by follow MST
-	int from = 0;
-	int to = adj_MST[0].back();
-	adj_MST[0].pop_back();
+	int from = min_from;
+	int to = min_to;
+	adj_MST[from].erase(adj_MST[from].begin());
 
 	pre_trip.push_back(from);
 	visited_mst[from] = 1;
@@ -212,6 +220,25 @@ int find_min(int k) {
 }
 */
 
+void two_opt() {
+
+	// 枝の選び方に改善の余地あり？
+	for(int i = 0; i < N - 3; i++) {
+		for (int k = i + 2; k < N - 1; k++) {
+			int j = i + 1;
+			int l = k + 1;
+			if (dis[trip[i]][trip[j]] + dis[trip[k]][trip[l]] > dis[trip[i]][trip[k]] + dis[trip[j]][trip[l]]) {
+				// float be = cal_total_len(trip);
+				reverse(trip.begin() + j, trip.begin() + l);
+				// float af = cal_total_len(trip);
+				// cout << i << " " << j << " " << k << " " << l << endl;
+				// cout  << be << " -> " << af << endl;
+			}
+		}
+	}
+}
+
+
 float cal_total_len(vector<int> trip) {
 
 	float len = 0.0;
@@ -232,7 +259,6 @@ void print_trip(vector<int> trip) {
 
 void print_total_len() {
 
-	cout << "index" << endl;
 	float min_len = cal_total_len(trip);
 	cout << setprecision(10) << min_len << endl;
 
@@ -260,8 +286,10 @@ int main() {
 	//print_trip(pre_trip);
 
 	make_trip();
+	two_opt();
+	cout << "index" << endl;
 	print_trip(trip);
 
-	// print_total_len();
+	print_total_len();
     return 0;
 }

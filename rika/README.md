@@ -36,3 +36,5 @@ Kruskal
 
 Make MST by Kruskal
 <http://dai1741.github.io/maximum-algo-2012/docs/minimum-spanning-tree/>
+
+そんなにlen小さくならなかった。ちょっといじるか、1.5近似にchallengeするか。。。
