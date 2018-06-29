@@ -44,11 +44,6 @@ int find_min(int k) {
 float cal_total_len(vector<int> trip) {
 
 	float len = 0.0;
-	/*
-	for (auto num : trip) {
-		len += dis[num][num + 1];
-	}
-	*/
 
 	for (int i = 0; i < N - 1; i++) {
 		len += dis[trip[i]][trip[i+1]];
@@ -56,6 +51,33 @@ float cal_total_len(vector<int> trip) {
 	len += dis[trip[N - 1]][trip[0]];
 
 	return len;
+}
+
+void nn() {
+
+	trip.push_back(0);
+	visited[0] = 1;
+	int next_city = find_min(0);
+
+	for (int i = 0; i < N - 1; i++) {
+		trip.push_back(next_city);
+		visited[next_city] = 1;
+    	next_city = find_min(next_city);
+	}
+}
+
+void print_trip() {
+
+	for (auto num : trip) {
+		cout << num << endl;
+	}
+}
+
+void print_trip_toal_len() {
+	
+	float min_len = cal_total_len(trip);
+	cout << setprecision(10) << min_len << endl;
+
 }
 
 int main() {
@@ -73,22 +95,10 @@ int main() {
     }
 
 	make_distance(data);
+	nn();
 
-	trip.push_back(0);
-	visited[0] = 1;
-	int next_city = find_min(0);
+	print_trip();
+//	print_trip_toral_len();
 
-	for (int i = 0; i < N - 1; i++) {
-		trip.push_back(next_city);
-		visited[next_city] = 1;
-    	next_city = find_min(next_city);
-	}
-
-	for (auto num : trip) {
-		cout << num << endl;
-	}
-
-	float min_len = cal_total_len(trip);
-	cout << setprecision(10) << min_len << endl;
-    return 0;
+	return 0;
 }

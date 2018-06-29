@@ -11,7 +11,7 @@ void make_distance(vector<P> data) {
 	for (int i = 0; i < N; i++) {
 		for (int j = 0; j < N; j++) {
 			if (i == j) {
-				dis[i][j] = INF;	// is it ok ? inf ?
+				dis[i][j] = INF;
 			}
 			else {
 				float x0 = data[i].first;

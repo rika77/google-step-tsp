@@ -1,7 +1,7 @@
 #include<bits/stdc++.h>
 using namespace std;
 #define INF 999999.0
-#define N 5
+#define N 512
 typedef pair<float,float> P;
 vector<P> data(N);
 float dis[N][N];
@@ -24,6 +24,16 @@ void make_distance(vector<P> data) {
 			}
 		}
 	}
+}
+
+float di(int from, int to) {
+	// distance betweeen trip(a) and trip(b)
+	return dis[trip[from]][trip[to]];
+}
+
+void swap(int i, int j) {
+	reverse(trip.begin() + i, trip.begin() + j);
+	return;
 }
 
 float cal_total_len(vector<int> trip) {
@@ -53,6 +63,8 @@ int find_min(int k) {
 	return min_city;
 }
 
+
+
 void two_opt() {
 
 	// 枝の選び方に改善の余地あり？
@@ -66,6 +78,76 @@ void two_opt() {
 				// float af = cal_total_len(trip);
 				// cout << i << " " << j << " " << k << " " << l << endl;
 				// cout  << be << " -> " << af << endl;
+			}
+		}
+	}
+}
+
+void three_opt() {
+
+	// 枝の選び方に改善の余地あり？
+	for(int a = 0; a < N - 5; a++) {
+		for (int c = a + 2; c < N - 3; c++) {
+			for (int e = c + 2; e < N - 1; e++) {
+				int b = a + 1;
+				int d = c + 1;
+				int f = e + 1;
+
+				float cases[8];
+				cases[0] = di(a,b) + di(c,d) + di(e,f);
+				cases[1] = di(a,c) + di(b,d) + di(e,f);
+				cases[2] = di(a,b) + di(c,e) + di(d,f);
+				cases[3] = di(a,e) + di(b,f) + di(c,d);
+				cases[4] = di(a,d) + di(b,f) + di(c,e);
+				cases[5] = di(a,e) + di(b,d) + di(c,f);
+				cases[6] = di(a,c) + di(b,e) + di(d,f);
+				cases[7] = di(a,d) + di(b,e) + di(c,f);
+
+				float min_three = cases[0];
+				int num = 0;
+				for (int i = 1; i < 8; i++) {
+					if (min_three > cases[i]) {
+						min_three = cases[i];
+						num = i;
+					}
+				}
+				
+				//float be = cal_total_len(trip);
+
+				switch (num) {
+					case 0:
+						break;
+					case 1:
+						swap(b,c+1);
+						break;
+					case 2:
+						swap(d,e+1);
+						break;
+					case 3:
+						swap(b,e+1);
+						break;
+					case 4:
+						swap(b,e+1);
+						swap(e,d+1);
+						break;
+					case 5:
+						swap(b,e+1);
+						swap(c,b+1);
+						break;
+					case 6:
+						swap(b,c+1);
+						swap(d,e+1);
+						break;
+					case 7:
+						swap(b,e+1);
+						swap(e,d+1);
+						swap(c,b+1);
+						break;
+				}
+
+				//float af = cal_total_len(trip);
+				// cout << i << " " << j << " " << k << " " << l << endl;
+				//if (num) cout  << num << " " << be << " -> " << af << endl;
 			}
 		}
 	}
@@ -102,8 +184,9 @@ int main() {
     	next_city = find_min(next_city);
 	}
 
-	// second: 2-opt (swap)
 	two_opt();
+	// second: 3-opt
+	three_opt();
 
 
 	for (auto num : trip) {
